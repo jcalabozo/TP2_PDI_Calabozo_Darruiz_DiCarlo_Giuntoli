@@ -15,14 +15,14 @@ El trabajo resuelve los dos problemas planteados en la [consigna](docs/TUIA_PDI_
 ```text
 .
 ├── src/                    Código fuente
-├── datos/                  Imágenes de entrada provistas por la cátedra
+├── datos/                  Imágenes y pistas provistas por la cátedra
 │   ├── monedas.jpg
-│   └── Patentes/
-│       └── img01.png … img12.png
-├── docs/                   Consigna, pistas de la cátedra e informe
-│   ├── TUIA_PDI_TP2_2026_C2.pdf
+│   ├── Patentes/
+│   │   └── img01.png … img12.png
 │   ├── info_patentes.txt   Pistas para segmentar los caracteres de las patentes
 │   └── Factor de Forma.txt Cómo calcular el factor de forma de un contorno
+├── docs/                   Consigna e informe
+│   └── TUIA_PDI_TP2_2026_C2.pdf
 └── README.md
 ```
 
