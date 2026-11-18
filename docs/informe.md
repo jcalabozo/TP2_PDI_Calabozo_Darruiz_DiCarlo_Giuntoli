@@ -185,7 +185,9 @@ La Figura 8 resume los tres ítems: 9 monedas de 10 centavos, 5 de 1 peso, 3 de 
 
 ![Resultado final: monedas coloreadas por tipo y dados con su valor.](../resultados/problema1/08_resultado.png)
 
-El fondo no uniforme impide umbralar la imagen directamente, y el top-hat no lo resuelve en esta imagen porque las monedas están cerca entre sí y algunas son más oscuras que el tapete. Los bordes, en cambio, no dependen del nivel de gris absoluto, y la morfología los convierte en una máscara con un objeto por moneda o dado. Con esa máscara, el factor de forma separa monedas de dados, y el área separa los tres tipos de moneda con saltos de al menos 16 %, contra un 2,1 % como máximo dentro de cada tipo. En los dados, el área de cada hueco distingue los puntos de la cara superior de los de las caras laterales.
+Las principales dificultades fueron tres. La primera, el fondo: su gradiente impide umbralar la imagen directamente, y el top-hat no lo resuelve en esta imagen porque las monedas están cerca entre sí y algunas son más oscuras que el tapete. La segunda, los contornos de Canny, que tienen cortes y hay que cerrarlos sin unir monedas vecinas. La tercera, los puntos de las caras laterales de los dados, que también son huecos y se distinguen por su área.
+
+La segmentación por bordes resuelve el problema del fondo, porque los bordes no dependen del nivel de gris absoluto, y la morfología los convierte en una máscara con un objeto por moneda o dado. Con esa máscara, el factor de forma separa monedas de dados, y el área separa los tres tipos de moneda con saltos de al menos 16 %, contra un 2,1 % como máximo dentro de cada tipo. En los dados, el área de cada hueco distingue los puntos de la cara superior de los de las caras laterales.
 
 Los umbrales de Canny y los elementos estructurales se ajustaron para esta imagen. Con otra escala o iluminación habría que revisarlos, aunque los criterios de clasificación (factor de forma, saltos de área y área relativa de los puntos) son proporciones y no dependen del tamaño de la imagen.
 

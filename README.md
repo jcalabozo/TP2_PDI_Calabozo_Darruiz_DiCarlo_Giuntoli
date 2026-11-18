@@ -48,9 +48,3 @@ Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantall
 
 - [Informe PDF](docs/informe.pdf)
 - [Fuente del informe](docs/informe.md)
-
-El PDF se genera con la plantilla de informes del repo común `tuia`, desde esa carpeta y con su entorno:
-
-```bash
-python _plantillas/informe/generar_informe.py tuia-pdi/TP2_PDI_Calabozo_Darruiz_DiCarlo_Giuntoli/docs/informe.md tuia-pdi/TP2_PDI_Calabozo_Darruiz_DiCarlo_Giuntoli/docs/caratula.toml
-```
