@@ -42,9 +42,15 @@ python src/problema1_monedas_dados.py
 python src/problema2_patentes.py
 ```
 
-Los scripts leen `datos/` y generan `resultados/`. El primero guarda la entrada, corrección de iluminación, máscara y clasificación. El segundo usa la primera mitad del conjunto (`img01.png` a `img06.png`) y guarda, para cada foto, máscara de candidatos, recorte de patente, caracteres binarizados y resultado anotado; `resumen.md` reúne las cajas y cantidades.
+Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantalla, imprime y guarda cada etapa: el análisis del fondo, el intento con top-hat, los bordes, la máscara, la separación entre monedas y dados, el área de cada moneda, los puntos de cada dado y el resultado final. Cada figura se muestra en una ventana, y el script sigue al cerrarla. El segundo usa la primera mitad del conjunto (`img01.png` a `img06.png`) y guarda, para cada foto, máscara de candidatos, recorte de patente, caracteres binarizados y resultado anotado; `resumen.md` reúne las cajas y cantidades.
 
 ## Documentación
 
 - [Informe PDF](docs/informe.pdf)
 - [Fuente del informe](docs/informe.md)
+
+El PDF se genera con la plantilla de informes del repo común `tuia`, desde esa carpeta y con su entorno:
+
+```bash
+python _plantillas/informe/generar_informe.py tuia-pdi/TP2_PDI_Calabozo_Darruiz_DiCarlo_Giuntoli/docs/informe.md tuia-pdi/TP2_PDI_Calabozo_Darruiz_DiCarlo_Giuntoli/docs/caratula.toml
+```
