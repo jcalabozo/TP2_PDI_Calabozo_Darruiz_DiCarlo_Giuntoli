@@ -42,7 +42,7 @@ python src/problema1_monedas_dados.py
 python src/problema2_patentes.py
 ```
 
-Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantalla, imprime y guarda cada etapa: el análisis del fondo, el intento con top-hat, los bordes, la máscara, la separación entre monedas y dados, el área de cada moneda, los puntos de cada dado y el resultado final. El segundo procesa las doce imágenes de patentes. Para cada una imprime los umbrales probados que dan una patente válida, el umbral elegido, los caracteres, la caja de la placa y su inclinación, y muestra y guarda una figura con las etapas. Al final imprime un resumen y muestra las doce placas, con sus caracteres y enderezadas. En los dos scripts, cada figura se muestra en una ventana y el script sigue al cerrarla.
+Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantalla, imprime y guarda cada etapa: el análisis del fondo, el intento con top-hat, los bordes, la máscara (con el detalle de una moneda en cada paso), la separación entre monedas y dados, el área de cada moneda, los puntos de cada dado y el resultado final. El segundo muestra primero el detalle de cada paso con `img01.png` (binarización, candidatos a carácter, elección del umbral, placa y placa enderezada) y después procesa las doce imágenes: imprime los resultados de cada una y muestra una figura por etapa con las doce (largo de la cadena según el umbral, candidatos, placas detectadas, caracteres y placas enderezadas). En los dos scripts, cada figura se muestra en una ventana y el script sigue al cerrarla.
 
 ## Documentación
 
