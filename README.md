@@ -5,7 +5,7 @@ Procesamiento de Imágenes I (IA 4.4) · 2026, 2° semestre
 
 **Integrantes:** Josías Calabozo, Ismael Darruiz, Sebastián Di Carlo, Sharo Giuntoli
 
-El trabajo resuelve los dos problemas de la [consigna](docs/TUIA_PDI_TP2_2026_C2.pdf): detección y conteo de monedas/dados, y detección de patentes con segmentación de caracteres. Para el Problema 2 se usa la primera mitad de las imágenes disponibles: `img01.png` a `img06.png`.
+El trabajo resuelve los dos problemas de la [consigna](docs/TUIA_PDI_TP2_2026_C2.pdf): detección y conteo de monedas/dados, y detección de patentes con segmentación de caracteres en las doce imágenes de la carpeta `datos/Patentes`.
 
 ## Estructura
 
@@ -42,7 +42,7 @@ python src/problema1_monedas_dados.py
 python src/problema2_patentes.py
 ```
 
-Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantalla, imprime y guarda cada etapa: el análisis del fondo, el intento con top-hat, los bordes, la máscara, la separación entre monedas y dados, el área de cada moneda, los puntos de cada dado y el resultado final. Cada figura se muestra en una ventana, y el script sigue al cerrarla. El segundo usa la primera mitad del conjunto (`img01.png` a `img06.png`) y guarda, para cada foto, máscara de candidatos, recorte de patente, caracteres binarizados y resultado anotado; `resumen.md` reúne las cajas y cantidades.
+Los scripts leen `datos/` y generan `resultados/`. El primero muestra en pantalla, imprime y guarda cada etapa: el análisis del fondo, el intento con top-hat, los bordes, la máscara, la separación entre monedas y dados, el área de cada moneda, los puntos de cada dado y el resultado final. El segundo procesa las doce imágenes de patentes. Para cada una imprime los umbrales probados que dan una patente válida, el umbral elegido, los caracteres, la caja de la placa y su inclinación, y muestra y guarda una figura con las etapas. Al final imprime un resumen y muestra las doce placas, con sus caracteres y enderezadas. En los dos scripts, cada figura se muestra en una ventana y el script sigue al cerrarla.
 
 ## Documentación
 

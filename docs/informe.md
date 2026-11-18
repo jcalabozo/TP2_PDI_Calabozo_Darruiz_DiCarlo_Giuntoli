@@ -193,16 +193,115 @@ Los umbrales de Canny y los elementos estructurales se ajustaron para esta image
 
 ## Problema 2: Detección y segmentación de patentes
 
-### Detección de la placa
+### Descripción del problema
 
-Se umbralizan las zonas oscuras de cada imagen y se aplican cierre y dilatación con elementos rectangulares horizontales. Los contornos candidatos se filtran por área, relación ancho/alto y posición; el puntaje favorece el rectángulo con componentes claras internas y relación de aspecto de patente.
+Las doce imágenes `img01.png` a `img12.png`, de 640×360 píxeles, muestran la parte delantera o trasera de distintos vehículos con su patente. La consigna pide, para cada una:
 
-### Segmentación de caracteres
+- **A)** Detectar automáticamente la placa patente y segmentarla.
+- **B)** Segmentar los caracteres de la placa detectada.
 
-Se elimina el margen de la placa, se binarizan las letras claras y se buscan componentes conectadas. Se retienen las de área intermedia y relación alto/ancho entre 1,2 y 4,2, consistente con la pista de la cátedra (1,5 a 3). Las componentes se ordenan de izquierda a derecha; las máscaras, recortes y cajas se guardan para la primera mitad del conjunto: `img01.png` a `img06.png`.
+La solución está en `src/problema2_patentes.py`. Primero busca los caracteres y después, a partir de ellos, la placa. Para cada imagen muestra en pantalla y guarda en `resultados/problema2/` una figura con las etapas, y al final una figura con las doce placas.
 
-![Ejemplo de placa detectada y componentes segmentadas, imagen 06.](../resultados/problema2/img06_resultado.png)
+### Lo que se sabe de una patente
 
-### Dificultades y conclusión
+Las placas tienen caracteres blancos sobre fondo negro, rodeados por un marco blanco. La pista de la cátedra (`info_patentes.txt`) agrega tres datos, que son la base del método:
 
-Rejillas, paragolpes y sombras introducen rectángulos oscuros parecidos a una matrícula, por lo que se combinan forma, ubicación y estructura interna. Los parámetros se expresan como proporciones del recorte para tolerar cambios de escala. En una colección mayor, convendría rectificar la perspectiva antes de segmentar y validar el patrón de dos grupos de tres caracteres.
+- La relación alto/ancho de un carácter está entre 1,5 y 3.
+- Los caracteres forman grupos de a 3.
+- La patente tiene dos grupos de 3 caracteres.
+
+En una imagen umbralizada hay cientos de componentes. Pocas tienen forma de carácter, y casi nunca hay seis seguidas, alineadas y de la misma altura, salvo en la patente.
+
+### Candidatos a carácter
+
+Para un umbral dado, la imagen en grises se binariza (blanco lo que supera el umbral) y se buscan las componentes conectadas con `cv2.connectedComponentsWithStats` (Unidad 3). Son candidatos a carácter las que cumplen:
+
+- **Alto entre 8 y 40 píxeles.** Es un rango amplio alrededor de lo que miden los caracteres en estas imágenes: según la salida del script, su alto mediano va de 11 a 20 píxeles.
+- **Relación alto/ancho entre 1,5 y 3**, la de la pista.
+- **Área de 15 píxeles o más**, para descartar manchas sueltas.
+
+### Cadena de caracteres
+
+Entre los candidatos, ordenados de izquierda a derecha, se busca la cadena más larga en la que cada carácter cumple, respecto del anterior:
+
+- **Alto parecido:** difiere del alto del primero de la cadena en menos del 30 %.
+- **Alineado:** su centro vertical está a menos de 0,4 altos del centro del anterior. Esto tolera las placas un poco inclinadas.
+- **Cerca:** empieza después de la mitad del anterior, y el espacio entre los dos es de 1,5 altos como mucho.
+
+Una cadena es una patente válida si tiene 6 caracteres y el espacio más grande está entre el tercero y el cuarto: los dos grupos de 3 de la pista.
+
+### Elección del umbral
+
+Un único umbral no alcanza. Con el de Otsu (Unidad 3), la cadena es una patente válida en 6 de las 12 imágenes. En la imagen 1, por ejemplo, Otsu da 114 y la cadena más larga tiene 4 caracteres:
+
+```text
+img01
+  Umbrales con 6 caracteres en dos grupos de 3: 8, de 145 a 180
+  Umbral de Otsu: 114, cadena más larga: 4 (no es una patente válida)
+  Umbral elegido: 165, caracteres: 6, alto mediano: 15 px
+  Espacios entre caracteres (px): [2, 2, 12, 2, 2]
+  Placa (x, y, ancho, alto): (334, 133, 75, 42)
+```
+
+Por eso el script prueba todos los umbrales de 40 a 230, de 5 en 5, y con cada uno busca la cadena más larga. La Figura 9 muestra el resultado para la imagen 1. Con umbrales bajos, los caracteres quedan pegados al marco blanco de la placa y forman una sola componente. Con umbrales altos, sus trazos se cortan. Entre los dos extremos hay un rango de umbrales, de 145 a 180 en esta imagen, en el que aparecen los 6 caracteres en dos grupos de 3. Se elige el umbral del medio de ese rango, el más alejado de los dos problemas. Si ningún umbral da una patente válida, se usa el del medio entre los que dan la cadena más larga.
+
+![Imagen 1: placa detectada, largo de la cadena según el umbral, candidatos (amarillo) y cadena elegida (verde) con el umbral elegido, placa con sus caracteres y placa enderezada.](../resultados/problema2/img01_etapas.png)
+
+El rango de umbrales válidos cambia mucho de una imagen a otra, porque cada foto tiene otra iluminación y otro contraste (tabla de la sección 2.7). El de la imagen 1 (145 a 180) y el de la imagen 2 (90 a 120) ni siquiera se tocan, así que no hay un umbral fijo que sirva para todas.
+
+### Placa (ítem A) y caracteres (ítem B)
+
+Los caracteres de la cadena elegida son la segmentación del ítem B. La placa se obtiene a partir de ellos: es el rectángulo que los contiene, agrandado en proporción al alto mediano de los caracteres para incluir el marco y la inscripción superior. Se agranda 0,4 altos a cada lado, 0,8 arriba y 0,5 abajo. Los márgenes se eligieron mirando las doce placas. La caja no se rota para seguir la inclinación de la placa: al presentar el TP, la cátedra aclaró que no hace falta.
+
+![Las doce placas detectadas, con los caracteres segmentados en verde.](../resultados/problema2/resumen_placas.png)
+
+Además, el script muestra cada placa enderezada (Figura 11). La inclinación sale de la recta que mejor ajusta las bases de los caracteres, calculada con `np.polyfit`. Después, la imagen se rota ese ángulo alrededor del centro de la placa con `cv2.getRotationMatrix2D` y `cv2.warpAffine` (Unidad 4). Las esquinas de los caracteres se llevan a la imagen rotada con `cv2.transform`, y la placa se recorta con los mismos márgenes que antes. Las placas están inclinadas hasta 14,1° (imagen 4). Enderezarlas no cambia la detección, porque se hace después de encontrar los caracteres. La cadena, por su parte, ya admite placas inclinadas: la imagen 4, la más inclinada, sale completa.
+
+![Las doce placas enderezadas, con el ángulo que se rotó cada una.](../resultados/problema2/resumen_placas_enderezadas.png)
+
+### Resultados
+
+Al final, el script imprime el resumen de las doce imágenes:
+
+```text
+Placas con los 6 caracteres segmentados: 11 de 12
+Con un único umbral (Otsu) habrían sido: 6 de 12
+```
+
+La tabla siguiente junta, para cada imagen, lo que imprime el script:
+
+| Imagen | Umbrales válidos | Umbral elegido | Otsu (caracteres en la cadena) | Espacio entre grupos (px) | Inclinación |
+|:--|:--|--:|:--|--:|--:|
+| img01 | 8, de 145 a 180 | 165 | 114 (4) | 12 | −7,9° |
+| img02 | 7, de 90 a 120 | 105 | 116 (6) | 9 | −9,7° |
+| img03 | ninguno | 120 | 124 (5) | no aplica | −12,2° |
+| img04 | 15, de 125 a 195 | 160 | 115 (2) | 10 | −14,1° |
+| img05 | 17, de 110 a 190 | 150 | 118 (6) | 13 | −10,5° |
+| img06 | 12, de 55 a 120 | 95 | 102 (6) | 13 | −7,9° |
+| img07 | 10, de 75 a 120 | 100 | 107 (6) | 10 | 0,0° |
+| img08 | 13, de 130 a 190 | 160 | 119 (2) | 10 | −8,3° |
+| img09 | 9, de 80 a 120 | 100 | 134 (4) | 13 | −0,2° |
+| img10 | 6, de 115 a 140 | 130 | 122 (6) | 12 | −3,6° |
+| img11 | 4, de 135 a 150 | 145 | 112 (1) | 10 | −9,9° |
+| img12 | 7, de 80 a 110 | 95 | 92 (6) | 8 | −5,3° |
+
+En las 11 placas completas, el espacio entre los dos grupos mide entre 8 y 13 píxeles. Los espacios entre caracteres del mismo grupo miden entre 0 y 5. En la imagen 6, los umbrales válidos no son continuos: hay 12 entre 55 y 120, con un hueco en el medio.
+
+**La imagen 3** es la única incompleta: se segmentan 5 caracteres y falta la «D». La Figura 12 muestra por qué. La placa está inclinada y la «D» toca el marco. Con el umbral elegido, las dos forman un solo candidato (en amarillo), más alto que los demás caracteres, que queda fuera de la cadena por la condición de alto parecido. Con umbrales más altos, el trazo de la «D» se corta antes de separarse del marco, así que ningún umbral da 6 caracteres. Como la placa se arma a partir de los caracteres, su caja deja afuera el extremo izquierdo.
+
+![Imagen 3: la «D», pegada al marco, forma un candidato más alto que el resto (amarillo) y queda fuera de la cadena.](../resultados/problema2/img03_etapas.png)
+
+Las figuras de las demás imágenes están en `resultados/problema2/`.
+
+### Dificultades y conclusiones
+
+Las principales dificultades fueron:
+
+- **El umbral:** cada imagen tiene otra iluminación, y el rango de umbrales que separa los caracteres cambia de una a otra.
+- **El marco de la placa:** con umbrales bajos se pega a los caracteres, y en la imagen 3 ningún umbral separa la «D» del marco sin cortarla.
+- **Los trazos finos:** los caracteres miden entre 11 y 20 píxeles de alto, y sus trazos tienen muy pocos píxeles de ancho. Una apertura para despegarlos del marco los rompe, así que se descartó.
+- **El resto de la imagen:** rejas, paragolpes, adoquines y reflejos generan muchas componentes con forma de carácter.
+
+Lo que resuelve el problema son las pistas de la cátedra. La relación alto/ancho deja pocos candidatos, y la condición de seis caracteres alineados en dos grupos de 3 aparece solo en la patente. Probar todos los umbrales en lugar de usar uno solo adapta el método a cada imagen: con Otsu habrían sido 6 placas completas de 12, y con el barrido son 11. Las doce placas quedan ubicadas, aunque en la imagen 3 la caja no incluye el extremo izquierdo.
+
+El método tiene límites. La caja de la placa sale de márgenes fijos alrededor de los caracteres, no de los bordes reales de la placa. El rango de altos y las tolerancias están pensados para patentes de este tamaño en la imagen. Y si ningún umbral separa un carácter del marco sin cortarlo, como en la imagen 3, la cadena queda incompleta.
